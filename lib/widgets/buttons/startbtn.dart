@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:glassmorphism/glassmorphism.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:get/get.dart';
 
 class StartButton {
   static Widget buildStartButton(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Aquí navegarías a la siguiente pantalla
-        // Get.toNamed('/next-screen');
+        Get.toNamed('/home');
       },
       child: GlassmorphicContainer(
         width: double.infinity,
