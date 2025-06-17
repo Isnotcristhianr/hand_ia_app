@@ -11,10 +11,7 @@ class ProfileContent extends StatefulWidget {
 }
 
 class _ProfileContentState extends State<ProfileContent> {
-  bool _darkMode = true;
-  bool _notifications = true;
-  bool _saveHistory = true;
-  bool _privacyMode = true;
+  bool _notifications = false;
 
   @override
   Widget build(BuildContext context) {
@@ -66,16 +63,11 @@ class _ProfileContentState extends State<ProfileContent> {
           const SizedBox(height: 16),
 
           // Privacidad
-          _buildToggleItem(
+          _buildProfileItem(
             icon: Icons.privacy_tip_outlined,
-            title: "Modo Privado",
-            subtitle: "Cambia entre el modo claro y oscuro",
-            value: _privacyMode,
-            onChanged: (value) {
-              setState(() {
-                _privacyMode = value;
-              });
-            },
+            title: "Políticas de Privacidad",
+            subtitle: "Consulta nuestras políticas de privacidad",
+            onTap: () {},
           ),
 
           const SizedBox(height: 32),
