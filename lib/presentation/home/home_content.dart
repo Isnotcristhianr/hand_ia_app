@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 //widgets
 import '../../widgets/welcome/logo.dart';
 import '../../widgets/glass/glass_container.dart';
+//services
+import '../../services/mensajes_daily_service.dart';
 
 class HomeContent extends StatelessWidget {
   const HomeContent({super.key});
@@ -12,7 +14,7 @@ class HomeContent extends StatelessWidget {
       children: [
         // Header fijo con logo y descripción
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 20.0),
+          padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 10.0),
           child: Column(
             children: [
               // Logo más pequeño y en esquina izquierda
@@ -25,19 +27,47 @@ class HomeContent extends StatelessWidget {
                 ),
               ),
 
-              // Descripción en glass container
+              // Mensaje del día en glass container
               GlassContainer(
+                height: 125,
                 borderRadius: 20,
                 padding: const EdgeInsets.all(20),
-                child: const Text(
-                  'Utiliza inteligencia artificial avanzada para analizar las líneas de tu mano y obtener insights únicos sobre tu personalidad y futuro.',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w300,
-                    height: 1.4,
-                  ),
-                  textAlign: TextAlign.center,
+                child: Column(
+                  children: [
+                    // Etiqueta "Mensaje del día"
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_today,
+                          color: Colors.white.withValues(alpha: 0.8),
+                          size: 16,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Mensaje del día',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.8),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Mensaje del día dinámico
+                    Text(
+                      MensajesDailyService.getMensajeDelDia(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w300,
+                        height: 1.4,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
               ),
             ],
