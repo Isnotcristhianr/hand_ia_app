@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 //widgets
 import '../../widgets/glass/glass_container.dart';
 
 class NavBar {
-  static Widget buildNavBar() {
+  static Widget buildNavBar({
+    int currentIndex = 0,
+    required Function(int) onTap,
+  }) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: GlassContainer(
@@ -18,8 +20,8 @@ class NavBar {
             // Home button
             _buildNavButton(
               icon: Icons.home,
-              isActive: Get.currentRoute == '/home',
-              onTap: () => Get.toNamed('/home'),
+              isActive: currentIndex == 0,
+              onTap: () => onTap(0),
             ),
 
             // Add button (destacado)
@@ -27,9 +29,7 @@ class NavBar {
               width: 75,
               height: 75,
               decoration: const BoxDecoration(
-                color: Color(
-                  0xFF6366F1,
-                ), // Color morado similar al de la imagen
+                color: Color(0xFF6366F1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.add, color: Colors.white, size: 28),
@@ -38,8 +38,8 @@ class NavBar {
             // Profile button
             _buildNavButton(
               icon: Icons.person,
-              isActive: Get.currentRoute == '/profile',
-              onTap: () => Get.toNamed('/profile'),
+              isActive: currentIndex == 1,
+              onTap: () => onTap(1),
             ),
           ],
         ),
