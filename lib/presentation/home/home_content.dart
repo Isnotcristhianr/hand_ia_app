@@ -25,8 +25,6 @@ class HomeContent extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 24),
-
               // Descripción en glass container
               GlassContainer(
                 borderRadius: 20,
