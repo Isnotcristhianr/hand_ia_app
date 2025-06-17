@@ -7,7 +7,7 @@ import '../../widgets/glass/glass_container.dart';
 class NavBar {
   static Widget buildNavBar() {
     return Padding(
-      padding: const EdgeInsets.all(32.0),
+      padding: const EdgeInsets.all(8.0),
       child: GlassContainer(
         height: 70,
         borderRadius: 35,
@@ -18,7 +18,7 @@ class NavBar {
             // Home button
             _buildNavButton(
               icon: Icons.home,
-              isActive: true,
+              isActive: Get.currentRoute == '/home',
               onTap: () => Get.toNamed('/home'),
             ),
 
@@ -38,7 +38,7 @@ class NavBar {
             // Profile button
             _buildNavButton(
               icon: Icons.person,
-              isActive: false,
+              isActive: Get.currentRoute == '/profile',
               onTap: () => Get.toNamed('/profile'),
             ),
           ],
