@@ -8,12 +8,12 @@ class HomeContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 20.0),
-      child: Column(
-        children: [
-          // Header con logo
-          Column(
+    return Column(
+      children: [
+        // Header fijo con logo y descripción
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 20.0),
+          child: Column(
             children: [
               // Logo más pequeño y en esquina izquierda
               Padding(
@@ -27,7 +27,7 @@ class HomeContent extends StatelessWidget {
 
               const SizedBox(height: 24),
 
-              // Descripción
+              // Descripción en glass container
               GlassContainer(
                 borderRadius: 20,
                 padding: const EdgeInsets.all(20),
@@ -44,15 +44,18 @@ class HomeContent extends StatelessWidget {
               ),
             ],
           ),
+        ),
 
-          const SizedBox(height: 20),
+        const SizedBox(height: 20),
 
-          // Lista de lecturas
-          ...List.generate(
-            5,
-            (index) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: GlassContainer(
+        // Lista scrollable de lecturas
+        Expanded(
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0),
+            itemCount: 5,
+            separatorBuilder: (context, index) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              return GlassContainer(
                 height: 60,
                 borderRadius: 30,
                 padding: const EdgeInsets.symmetric(
@@ -98,11 +101,11 @@ class HomeContent extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
-            ),
+              );
+            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

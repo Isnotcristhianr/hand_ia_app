@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 //widgets
 import '../../widgets/glass/glass_container.dart';
 
@@ -44,21 +45,6 @@ class _ProfileContentState extends State<ProfileContent> {
 
           const SizedBox(height: 16),
 
-          // Modo Oscuro
-          _buildToggleItem(
-            icon: Icons.dark_mode_outlined,
-            title: "Modo Oscuro",
-            subtitle: "Cambia entre el modo claro y oscuro",
-            value: _darkMode,
-            onChanged: (value) {
-              setState(() {
-                _darkMode = value;
-              });
-            },
-          ),
-
-          const SizedBox(height: 12),
-
           // Notificaciones
           _buildToggleItem(
             icon: Icons.notifications_outlined,
@@ -68,21 +54,6 @@ class _ProfileContentState extends State<ProfileContent> {
             onChanged: (value) {
               setState(() {
                 _notifications = value;
-              });
-            },
-          ),
-
-          const SizedBox(height: 12),
-
-          // Guardar el Historial
-          _buildToggleItem(
-            icon: Icons.history,
-            title: "Guardar el Historial",
-            subtitle: "Conserva tus análisis anteriores",
-            value: _saveHistory,
-            onChanged: (value) {
-              setState(() {
-                _saveHistory = value;
               });
             },
           ),
@@ -105,6 +76,30 @@ class _ProfileContentState extends State<ProfileContent> {
                 _privacyMode = value;
               });
             },
+          ),
+
+          const SizedBox(height: 32),
+
+          //cerrar sesión
+          const SizedBox(height: 32),
+
+          //boton cerrar sesión
+          Center(
+            child: ElevatedButton(
+              onPressed: () {
+                Get.offAllNamed('/');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 50),
+                textStyle: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              child: const Text("Cerrar Sesión"),
+            ),
           ),
         ],
       ),
