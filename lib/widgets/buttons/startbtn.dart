@@ -20,16 +20,16 @@ class StartButton {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            const Color(0xFF7C4DFF).withOpacity(0.3),
-            const Color(0xFFB388FF).withOpacity(0.2),
+            const Color(0xFF7C4DFF).withValues(alpha: 0.3),
+            const Color(0xFFB388FF).withValues(alpha: 0.2),
           ],
         ),
         borderGradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.white.withOpacity(0.3),
-            Colors.white.withOpacity(0.1),
+            Colors.white.withValues(alpha: 0.3),
+            Colors.white.withValues(alpha: 0.1),
           ],
         ),
         child: Text(

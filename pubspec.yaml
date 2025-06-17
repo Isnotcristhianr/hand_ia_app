@@ -1,5 +1,5 @@
 name: hand_ia
-description: "Hand IA es una aplicación que te permite hacer una lectura de tarot con tu mano y tu mente para que puedas ver el futuro."
+description: "Utiliza inteligencia artificial avanzada para analizar las líneas de tu mano y obtener insights únicos sobre tu personalidad y futuro."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'Appstore and Playstore' # Remove this line if you wish to publish to pub.dev

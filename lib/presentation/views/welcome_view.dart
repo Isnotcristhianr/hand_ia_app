@@ -26,7 +26,7 @@ class WelcomeView extends StatelessWidget {
                 // Logo y título principal
                 Logo.buildLogo(),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 12),
 
                 // Subtítulo
                 Lema.buildLema(),

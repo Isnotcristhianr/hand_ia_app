@@ -8,9 +8,9 @@ class Lema {
       textAlign: TextAlign.center,
       style: GoogleFonts.poppins(
         fontSize: 18,
-        color: Colors.white.withOpacity(0.9),
+        color: Colors.white.withValues(alpha: 0.9),
         height: 1.4,
-        fontWeight: FontWeight.w300,
+        fontWeight: FontWeight.w800,
       ),
     );
   }

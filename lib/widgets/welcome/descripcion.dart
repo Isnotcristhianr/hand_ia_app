@@ -8,7 +8,7 @@ class Descripcion {
       textAlign: TextAlign.center,
       style: GoogleFonts.poppins(
         fontSize: 16,
-        color: Colors.white.withOpacity(0.8),
+        color: Colors.white.withValues(alpha: 0.8),
         height: 1.6,
         fontWeight: FontWeight.w400,
       ),
