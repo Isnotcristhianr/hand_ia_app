@@ -1,5 +1,5 @@
 name: hand_ia
-description: "Hand IA es una aplicación que te permite hacer una lectura de tarot con tu mano y tu mente para que puedas ver el futuro."
+description: "Utiliza inteligencia artificial avanzada para analizar las líneas de tu mano y obtener insights únicos sobre tu personalidad y futuro."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'Appstore and Playstore' # Remove this line if you wish to publish to pub.dev
@@ -19,6 +19,11 @@ dependencies:
   flutter_launcher_icons: ^0.14.4
   #splash 
   flutter_native_splash: ^2.4.6
+  #get
+  get: ^4.7.2
+  # Para efectos visuales
+  glassmorphism: ^3.0.0
+  google_fonts: ^6.1.0
 
 dev_dependencies:
   flutter_test:
@@ -63,6 +68,7 @@ flutter:
   assets:
     - lib/assets/icon/logo.png
     - lib/assets/icon/logo_dark.png
+    - lib/assets/icon/logo_bg.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 
