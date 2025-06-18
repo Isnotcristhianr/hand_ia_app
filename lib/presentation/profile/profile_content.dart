@@ -3,6 +3,9 @@ import 'package:get/get.dart';
 //widgets
 import '../../widgets/glass/glass_container.dart';
 
+//controllers
+import '../../bloc/controllers/auth_controller.dart';
+
 class ProfileContent extends StatefulWidget {
   const ProfileContent({super.key});
 
@@ -79,7 +82,8 @@ class _ProfileContentState extends State<ProfileContent> {
           Center(
             child: ElevatedButton(
               onPressed: () {
-                Get.offAllNamed('/');
+                Get.put(AuthController()).logout();
+                Get.offAllNamed('/login');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
