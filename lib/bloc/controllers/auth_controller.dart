@@ -45,16 +45,21 @@ class AuthController extends GetxController {
 
       // Escuchar cambios en el estado de autenticación
       _auth.authStateChanges().listen((User? user) {
-        if (user != null && user.emailVerified) {
+        if (user != null) {
+          // Temporalmente permitimos login sin verificación de email
           uid.value = user.uid;
           _loadUserData();
           authStatus.value = AuthStatus.authenticated;
 
-          // Navegar automáticamente a home si está autenticado y verificado
+          // Navegar automáticamente a home si está autenticado
           final currentRoute = Get.currentRoute;
+          debugPrint(
+            'AuthController: Usuario autenticado, ruta actual: $currentRoute',
+          );
           if (currentRoute == '/' ||
               currentRoute == '/login' ||
               currentRoute == '/sign_in') {
+            debugPrint('AuthController: Navegando a /home');
             Get.offAllNamed('/home');
           }
         } else {
@@ -322,6 +327,19 @@ class AuthController extends GetxController {
       authStatus.value = AuthStatus.authenticated;
 
       debugPrint('AuthController: Login exitoso');
+
+      // Navegación manual como respaldo
+      Future.delayed(Duration(milliseconds: 500), () {
+        final currentRoute = Get.currentRoute;
+        debugPrint(
+          'AuthController: Verificando navegación post-login, ruta actual: $currentRoute',
+        );
+        if (currentRoute == '/login' || currentRoute == '/sign_in') {
+          debugPrint('AuthController: Navegación manual a /home');
+          Get.offAllNamed('/home');
+        }
+      });
+
       onSuccess();
     } on FirebaseAuthException catch (e) {
       debugPrint('AuthController: Error de Firebase - ${e.code}');
