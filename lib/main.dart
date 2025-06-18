@@ -71,10 +71,15 @@ class MyApp extends StatelessWidget {
   }
 
   String _getInitialRoute() {
-    if (Get.find<AuthController>().authStatus.value ==
-        AuthStatus.authenticated) {
-      return '/home';
-    } else {
+    try {
+      final authController = Get.find<AuthController>();
+      if (authController.authStatus.value == AuthStatus.authenticated) {
+        return '/home';
+      } else {
+        return '/';
+      }
+    } catch (e) {
+      // Si no se puede encontrar el AuthController, ir a welcome
       return '/';
     }
   }

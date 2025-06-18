@@ -6,7 +6,7 @@ import '../presentation/main_layout.dart';
 import '../presentation/views/login/login.dart';
 import '../presentation/views/login/sign_in.dart';
 import '../presentation/views/login/forgot.dart';
-
+import '../presentation/profile/account_info_view.dart';
 
 //routes
 class Routes {
@@ -14,23 +14,13 @@ class Routes {
     //welcome (ruta pública)
     GetPage(name: '/', page: () => const WelcomeView()),
     //main app (rutas protegidas)
-    GetPage(
-      name: '/home',
-      page: () => const MainLayout(initialIndex: 0),
-    ),
-    GetPage(
-      name: '/profile',
-      page: () => const MainLayout(initialIndex: 1),
-    ),
+    GetPage(name: '/home', page: () => const MainLayout(initialIndex: 0)),
+    GetPage(name: '/profile', page: () => const MainLayout(initialIndex: 1)),
     //login (rutas públicas)
-    GetPage(
-      name: '/login',
-      page: () => const LoginView(),
-    ),
-    GetPage(
-      name: '/sign_in',
-      page: () => const SignInView(),
-    ),
+    GetPage(name: '/login', page: () => const LoginView()),
+    GetPage(name: '/sign_in', page: () => const SignInView()),
     GetPage(name: '/forgot', page: () => const ForgotPasswordView()),
+    //account info
+    GetPage(name: '/account-info', page: () => const AccountInfoView()),
   ];
 }
