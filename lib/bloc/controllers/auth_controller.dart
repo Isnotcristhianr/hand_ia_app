@@ -45,12 +45,12 @@ class AuthController extends GetxController {
 
       // Escuchar cambios en el estado de autenticación
       _auth.authStateChanges().listen((User? user) {
-        if (user != null) {
+        if (user != null && user.emailVerified) {
           uid.value = user.uid;
           _loadUserData();
           authStatus.value = AuthStatus.authenticated;
 
-          // Navegar automáticamente a home si está autenticado
+          // Navegar automáticamente a home si está autenticado y verificado
           final currentRoute = Get.currentRoute;
           if (currentRoute == '/' ||
               currentRoute == '/login' ||
@@ -178,6 +178,10 @@ class AuthController extends GetxController {
         break;
       case 'wrong-password':
         errorMessage = 'Contraseña incorrecta.';
+        break;
+      case 'invalid-credential':
+        errorMessage =
+            'Credenciales inválidas. Verifique su correo y contraseña.';
         break;
       case 'user-disabled':
         errorMessage = 'Este usuario ha sido deshabilitado.';
@@ -358,13 +362,21 @@ class AuthController extends GetxController {
       await newUser.sendEmailVerification();
       await _createUserDocument(newUser, userName: name);
 
+      // Cerrar sesión después del registro para que el usuario verifique su email
+      await _auth.signOut();
+
+      authStatus.value = AuthStatus.unauthenticated;
+
       Get.snackbar(
         'Registro exitoso',
-        'Por favor, verifique su correo electrónico para activar su cuenta.',
+        'Por favor, verifique su correo electrónico para activar su cuenta y luego inicie sesión.',
         backgroundColor: Colors.green,
         colorText: Colors.white,
-        duration: const Duration(seconds: 3),
+        duration: const Duration(seconds: 4),
       );
+
+      // Redirigir al login después del registro
+      Get.offAllNamed('/login');
 
       onSuccess();
     } on FirebaseAuthException catch (e) {
@@ -375,9 +387,7 @@ class AuthController extends GetxController {
       onError(e.toString());
     } finally {
       isLoading.value = false;
-      if (authStatus.value != AuthStatus.authenticated) {
-        authStatus.value = AuthStatus.unauthenticated;
-      }
+      authStatus.value = AuthStatus.unauthenticated;
     }
   }
 
