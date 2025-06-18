@@ -36,7 +36,7 @@ class _LoginViewState extends State<LoginView> {
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 28.0,
-                  vertical: 0.0,
+                  vertical: 80.0,
                 ),
                 child: Column(
                   children: [

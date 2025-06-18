@@ -50,7 +50,7 @@ class GlassContainer extends StatelessWidget {
           ],
         ),
         child: Padding(
-          padding: padding ?? const EdgeInsets.all(16),
+          padding: padding ?? const EdgeInsets.all(12),
           child: child,
         ),
       ),
