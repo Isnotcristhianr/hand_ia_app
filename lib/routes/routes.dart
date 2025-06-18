@@ -7,17 +7,30 @@ import '../presentation/views/login/login.dart';
 import '../presentation/views/login/sign_in.dart';
 import '../presentation/views/login/forgot.dart';
 
+
 //routes
 class Routes {
   static final List<GetPage> pages = [
-    //welcome
+    //welcome (ruta pública)
     GetPage(name: '/', page: () => const WelcomeView()),
-    //main app (maneja home y profile internamente)
-    GetPage(name: '/home', page: () => const MainLayout(initialIndex: 0)),
-    GetPage(name: '/profile', page: () => const MainLayout(initialIndex: 1)),
-    //login
-    GetPage(name: '/login', page: () => const LoginView()),
-    GetPage(name: '/sign_in', page: () => const SignInView()),
+    //main app (rutas protegidas)
+    GetPage(
+      name: '/home',
+      page: () => const MainLayout(initialIndex: 0),
+    ),
+    GetPage(
+      name: '/profile',
+      page: () => const MainLayout(initialIndex: 1),
+    ),
+    //login (rutas públicas)
+    GetPage(
+      name: '/login',
+      page: () => const LoginView(),
+    ),
+    GetPage(
+      name: '/sign_in',
+      page: () => const SignInView(),
+    ),
     GetPage(name: '/forgot', page: () => const ForgotPasswordView()),
   ];
 }

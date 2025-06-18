@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 //widgets
 import '../../../widgets/glass/glass_container.dart';
 import '../../../widgets/glass/glass_btn.dart';
 import '../../../widgets/master/bg.dart';
+//controller
+import '../../../bloc/controllers/auth_controller.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -16,11 +19,42 @@ class _LoginViewState extends State<LoginView> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
+  final AuthController _authController = Get.put(AuthController());
+
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void _login() {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Por favor complete todos los campos',
+        backgroundColor: Colors.red.withValues(alpha: 0.8),
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    _authController.login(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+      onSuccess: () {
+        // La navegación se maneja automáticamente por el AuthController
+        debugPrint('Login exitoso, navegación automática activada');
+      },
+      onError: (error) {
+        Get.snackbar(
+          'Error de inicio de sesión',
+          error,
+          backgroundColor: Colors.red.withValues(alpha: 0.8),
+          colorText: Colors.white,
+        );
+      },
+    );
   }
 
   @override
@@ -120,15 +154,18 @@ class _LoginViewState extends State<LoginView> {
                           const SizedBox(height: 20),
 
                           // Botón de iniciar sesión
-                          GlassButton(
-                            text: 'Iniciar Sesión',
-                            onTap: () {
-                              // Lógica de login
-                              Navigator.pushReplacementNamed(context, '/main');
-                            },
-                            height: 50,
-                            fontSize: 17,
-                            fontWeight: FontWeight.w600,
+                          Obx(
+                            () => GlassButton(
+                              text: _authController.isLoading.value
+                                  ? 'Iniciando...'
+                                  : 'Iniciar Sesión',
+                              onTap: _authController.isLoading.value
+                                  ? () {}
+                                  : _login,
+                              height: 50,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
 
                           const SizedBox(height: 12),
@@ -192,7 +229,7 @@ class _LoginViewState extends State<LoginView> {
                             borderRadius: 135,
                             child: InkWell(
                               onTap: () {
-                                // Lógica de login con Google
+                                _authController.loginWithGoogle();
                               },
                               borderRadius: BorderRadius.circular(16),
                               child: Row(
@@ -226,7 +263,7 @@ class _LoginViewState extends State<LoginView> {
                             borderRadius: 35,
                             child: InkWell(
                               onTap: () {
-                                // Lógica de login con Apple
+                                _authController.loginWithApple();
                               },
                               borderRadius: BorderRadius.circular(16),
                               child: Row(

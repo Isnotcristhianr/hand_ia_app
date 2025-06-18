@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 //widgets
 import '../../../widgets/glass/glass_container.dart';
 import '../../../widgets/glass/glass_btn.dart';
 import '../../../widgets/master/bg.dart';
+//controller
+import '../../../bloc/controllers/auth_controller.dart';
 
 class ForgotPasswordView extends StatefulWidget {
   const ForgotPasswordView({super.key});
@@ -15,10 +18,41 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
   final _emailController = TextEditingController();
   bool _emailSent = false;
 
+  final AuthController _authController = Get.put(AuthController());
+
   @override
   void dispose() {
     _emailController.dispose();
     super.dispose();
+  }
+
+  void _sendRecoveryEmail() {
+    if (_emailController.text.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Por favor ingresa tu correo electrónico',
+        backgroundColor: Colors.orange.withValues(alpha: 0.8),
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    _authController.recoverPassword(
+      email: _emailController.text.trim(),
+      onSuccess: () {
+        setState(() {
+          _emailSent = true;
+        });
+      },
+      onError: (error) {
+        Get.snackbar(
+          'Error',
+          error,
+          backgroundColor: Colors.red.withValues(alpha: 0.8),
+          colorText: Colors.white,
+        );
+      },
+    );
   }
 
   @override
@@ -139,27 +173,18 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
               const SizedBox(height: 24),
 
               // Botón de enviar
-              GlassButton(
-                text: 'Enviar Instrucciones',
-                onTap: () {
-                  if (_emailController.text.isNotEmpty) {
-                    setState(() {
-                      _emailSent = true;
-                    });
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Por favor ingresa tu correo electrónico',
-                        ),
-                        backgroundColor: Colors.orange.withValues(alpha: 0.8),
-                      ),
-                    );
-                  }
-                },
-                height: 54,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
+              Obx(
+                () => GlassButton(
+                  text: _authController.isLoading.value
+                      ? 'Enviando...'
+                      : 'Enviar Instrucciones',
+                  onTap: _authController.isLoading.value
+                      ? () {}
+                      : _sendRecoveryEmail,
+                  height: 54,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),

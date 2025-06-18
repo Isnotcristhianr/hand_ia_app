@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 //widgets
 import '../../../widgets/glass/glass_container.dart';
 import '../../../widgets/glass/glass_btn.dart';
 import '../../../widgets/master/bg.dart';
+//controller
+import '../../../bloc/controllers/auth_controller.dart';
 
 class SignInView extends StatefulWidget {
   const SignInView({super.key});
@@ -20,6 +23,8 @@ class _SignInViewState extends State<SignInView> {
   bool _obscureConfirmPassword = true;
   bool _acceptTerms = false;
 
+  final AuthController _authController = Get.put(AuthController());
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -27,6 +32,58 @@ class _SignInViewState extends State<SignInView> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  void _register() {
+    if (_nameController.text.isEmpty ||
+        _emailController.text.isEmpty ||
+        _passwordController.text.isEmpty ||
+        _confirmPasswordController.text.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Por favor complete todos los campos',
+        backgroundColor: Colors.red.withValues(alpha: 0.8),
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    if (_passwordController.text != _confirmPasswordController.text) {
+      Get.snackbar(
+        'Error',
+        'Las contraseñas no coinciden',
+        backgroundColor: Colors.red.withValues(alpha: 0.8),
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    if (!_acceptTerms) {
+      Get.snackbar(
+        'Error',
+        'Debes aceptar los términos y condiciones',
+        backgroundColor: Colors.orange.withValues(alpha: 0.8),
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    _authController.register(
+      name: _nameController.text.trim(),
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+      onSuccess: () {
+        Get.toNamed('/login'); // Ir a login para verificar email
+      },
+      onError: (error) {
+        Get.snackbar(
+          'Error de registro',
+          error,
+          backgroundColor: Colors.red.withValues(alpha: 0.8),
+          colorText: Colors.white,
+        );
+      },
+    );
   }
 
   @override
@@ -193,45 +250,18 @@ class _SignInViewState extends State<SignInView> {
                           const SizedBox(height: 24),
 
                           // Botón de registro
-                          GlassButton(
-                            text: 'Crear Cuenta',
-                            onTap: _acceptTerms
-                                ? () {
-                                    // Lógica de registro
-                                    if (_passwordController.text ==
-                                        _confirmPasswordController.text) {
-                                      Navigator.pushReplacementNamed(
-                                        context,
-                                        '/main',
-                                      );
-                                    } else {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            'Las contraseñas no coinciden',
-                                          ),
-                                          backgroundColor: Colors.red
-                                              .withValues(alpha: 0.8),
-                                        ),
-                                      );
-                                    }
-                                  }
-                                : () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          'Debes aceptar los términos y condiciones',
-                                        ),
-                                        backgroundColor: Colors.orange
-                                            .withValues(alpha: 0.8),
-                                      ),
-                                    );
-                                  },
-                            height: 54,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
+                          Obx(
+                            () => GlassButton(
+                              text: _authController.isLoading.value
+                                  ? 'Creando cuenta...'
+                                  : 'Crear Cuenta',
+                              onTap: _authController.isLoading.value
+                                  ? () {}
+                                  : _register,
+                              height: 54,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ],
                       ),
