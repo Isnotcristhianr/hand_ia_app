@@ -31,7 +31,7 @@ class _ProfileContentState extends State<ProfileContent> {
             title: "Mi Perfil",
             subtitle: "Administra tu información Personal",
             onTap: () {
-              // Navegación a editar perfil
+              Get.toNamed('/login');  
             },
           ),
 
