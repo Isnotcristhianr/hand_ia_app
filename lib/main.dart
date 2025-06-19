@@ -15,6 +15,7 @@ import 'bloc/controllers/auth_controller.dart';
 import 'bloc/controllers/ocr_controller.dart';
 //services
 import 'services/firebase_service.dart';
+import 'services/app_check_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,12 +38,29 @@ void main() async {
 
   final firebaseService = Get.find<FirebaseService>();
 
+  // Inicializar AppCheckService solo si Firebase está disponible
+  if (firebaseService.isAvailable) {
+    Get.put(AppCheckService());
+    await Get.find<AppCheckService>().onInit();
+    debugPrint('🛡️ AppCheckService inicializado');
+  }
+
   // Mostrar estado de Firebase
   debugPrint('🔥 Estado de Firebase:');
   final status = firebaseService.getFirebaseStatus();
   status.forEach((key, value) {
     debugPrint('   $key: $value');
   });
+
+  // Mostrar estado de App Check si está disponible
+  if (firebaseService.isAvailable && Get.isRegistered<AppCheckService>()) {
+    final appCheckService = Get.find<AppCheckService>();
+    debugPrint('🛡️ Estado de App Check:');
+    final appCheckStatus = appCheckService.getAppCheckStatus();
+    appCheckStatus.forEach((key, value) {
+      debugPrint('   $key: $value');
+    });
+  }
 
   // Inicializar AuthController solo si Firebase está disponible
   if (firebaseService.isAvailable) {

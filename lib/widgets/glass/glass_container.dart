@@ -22,38 +22,45 @@ class GlassContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Widget glassContent = GlassmorphicContainer(
+      width: width ?? double.infinity,
+      height: height ?? double.infinity,
+      borderRadius: borderRadius,
+      blur: 20,
+      alignment: Alignment.center,
+      border: 1,
+      linearGradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Colors.white.withValues(alpha: 0.1),
+          Colors.white.withValues(alpha: 0.05),
+        ],
+      ),
+      borderGradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Colors.white.withValues(alpha: 0.15),
+          Colors.white.withValues(alpha: 0.05),
+        ],
+      ),
+      child: Padding(
+        padding: padding ?? const EdgeInsets.all(12),
+        child: child,
+      ),
+    );
+
+    // Si no se especifica altura, usar IntrinsicHeight para ajustarse al contenido
+    if (height == null) {
+      glassContent = IntrinsicHeight(child: glassContent);
+    }
+
     return Container(
       width: width,
       height: height,
       margin: margin,
-      child: GlassmorphicContainer(
-        width: width ?? double.infinity,
-        height: height ?? 100,
-        borderRadius: borderRadius,
-        blur: 20,
-        alignment: Alignment.center,
-        border: 1,
-        linearGradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white.withValues(alpha: 0.1),
-            Colors.white.withValues(alpha: 0.05),
-          ],
-        ),
-        borderGradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white.withValues(alpha: 0.15),
-            Colors.white.withValues(alpha: 0.05),
-          ],
-        ),
-        child: Padding(
-          padding: padding ?? const EdgeInsets.all(12),
-          child: child,
-        ),
-      ),
+      child: glassContent,
     );
   }
 }
