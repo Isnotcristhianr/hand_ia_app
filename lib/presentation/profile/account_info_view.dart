@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import '../../widgets/glass/glass_container.dart';
 import '../../widgets/master/bg.dart';
-import '../../bloc/controllers/auth_controller.dart';
+import '../../bloc/controllers/profile_controller.dart';
 
 class AccountInfoView extends StatefulWidget {
   const AccountInfoView({super.key});
@@ -16,17 +17,23 @@ class _AccountInfoViewState extends State<AccountInfoView> {
   final _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isEditing = false;
+  late ProfileController _profileController;
 
   @override
   void initState() {
     super.initState();
+    _profileController = Get.put(ProfileController());
     _loadUserData();
   }
 
   void _loadUserData() {
-    final authController = Get.find<AuthController>();
-    _nameController.text = authController.userName.value;
-    _emailController.text = authController.userEmail.value;
+    // Los datos se cargan automáticamente desde el ProfileController
+    ever(_profileController.profileName, (name) {
+      _nameController.text = name;
+    });
+    ever(_profileController.profileEmail, (email) {
+      _emailController.text = email;
+    });
   }
 
   @override
@@ -80,6 +87,11 @@ class _AccountInfoViewState extends State<AccountInfoView> {
                               ),
 
                               const SizedBox(height: 10),
+
+                              // Campos adicionales de perfil
+                              _buildAdditionalFields(),
+
+                              const SizedBox(height: 16),
 
                               // Información adicional
                               _buildInfoSection(),
@@ -182,30 +194,33 @@ class _AccountInfoViewState extends State<AccountInfoView> {
               ),
             ),
             child: ClipOval(
-              child: GetBuilder<AuthController>(
-                builder: (controller) {
-                  if (controller.profileImage.value != null &&
-                      controller.profileImage.value!.isNotEmpty) {
-                    return Image.network(
-                      controller.profileImage.value!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(
-                          Icons.person,
-                          size: 60,
-                          color: Colors.white,
-                        );
-                      },
-                    );
-                  } else {
-                    return const Icon(
-                      Icons.person,
-                      size: 60,
-                      color: Colors.white,
-                    );
-                  }
-                },
-              ),
+              child: Obx(() {
+                if (_profileController.isUploadingImage.value) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: Color(0xFF7C4DFF)),
+                  );
+                }
+
+                if (_profileController.profilePhotoUrl.value.isNotEmpty) {
+                  return Image.network(
+                    _profileController.profilePhotoUrl.value,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(
+                        Icons.person,
+                        size: 60,
+                        color: Colors.white,
+                      );
+                    },
+                  );
+                } else {
+                  return const Icon(
+                    Icons.person,
+                    size: 60,
+                    color: Colors.white,
+                  );
+                }
+              }),
             ),
           ),
 
@@ -213,18 +228,21 @@ class _AccountInfoViewState extends State<AccountInfoView> {
             Positioned(
               bottom: 0,
               right: 0,
-              child: Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF7C4DFF),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
-                ),
-                child: const Icon(
-                  Icons.camera_alt,
-                  size: 18,
-                  color: Colors.white,
+              child: GestureDetector(
+                onTap: () => _profileController.selectProfileImage(),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF7C4DFF),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                  child: const Icon(
+                    Icons.camera_alt,
+                    size: 18,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
@@ -290,6 +308,113 @@ class _AccountInfoViewState extends State<AccountInfoView> {
     );
   }
 
+  Widget _buildAdditionalFields() {
+    return Column(
+      children: [
+        // Género
+        GestureDetector(
+          onTap: _isEditing
+              ? () => _profileController.showGeneroSelector(context)
+              : null,
+          child: _buildSelectableField(
+            icon: Icons.person_outline,
+            label: "Género",
+            value: Obx(
+              () => Text(
+                _profileController.generoText,
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+            enabled: _isEditing,
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        // Signo Zodiacal
+        GestureDetector(
+          onTap: _isEditing
+              ? () => _profileController.showSignoSelector(context)
+              : null,
+          child: _buildSelectableField(
+            icon: Icons.star_outline,
+            label: "Signo Zodiacal",
+            value: Obx(
+              () => Text(
+                _profileController.signoText,
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+            enabled: _isEditing,
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        // Fecha de Nacimiento
+        GestureDetector(
+          onTap: _isEditing
+              ? () => _profileController.selectBirthDate(context)
+              : null,
+          child: _buildSelectableField(
+            icon: Icons.cake_outlined,
+            label: "Fecha de Nacimiento",
+            value: Obx(() {
+              final date = _profileController.profileFechaNacimiento.value;
+              return Text(
+                DateFormat('dd/MM/yyyy').format(date),
+                style: const TextStyle(color: Colors.white),
+              );
+            }),
+            enabled: _isEditing,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSelectableField({
+    required IconData icon,
+    required String label,
+    required Widget value,
+    required bool enabled,
+  }) {
+    return GlassContainer(
+      height: 80,
+      borderRadius: 16,
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.white.withValues(alpha: 0.7), size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.8),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                value,
+              ],
+            ),
+          ),
+          if (enabled)
+            Icon(
+              Icons.keyboard_arrow_right,
+              color: Colors.white.withValues(alpha: 0.5),
+            ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildInfoSection() {
     return GlassContainer(
       height: 215,
@@ -321,10 +446,12 @@ class _AccountInfoViewState extends State<AccountInfoView> {
             subtitle: "Usuario gratuito",
           ),
 
-          _buildInfoItem(
-            icon: Icons.language_outlined,
-            title: "Idioma",
-            subtitle: "Español",
+          Obx(
+            () => _buildInfoItem(
+              icon: Icons.cake_outlined,
+              title: "Edad",
+              subtitle: "${_profileController.calculatedAge} años",
+            ),
           ),
         ],
       ),
@@ -377,18 +504,43 @@ class _AccountInfoViewState extends State<AccountInfoView> {
         SizedBox(
           width: double.infinity,
           height: 50,
-          child: ElevatedButton(
-            onPressed: _saveChanges,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF7C4DFF),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
+          child: Obx(
+            () => ElevatedButton(
+              onPressed: _profileController.isSaving.value
+                  ? null
+                  : _saveChanges,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF7C4DFF),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25),
+                ),
               ),
-            ),
-            child: const Text(
-              "Guardar Cambios",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              child: _profileController.isSaving.value
+                  ? const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                        SizedBox(width: 12),
+                        Text(
+                          "Guardando...",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    )
+                  : const Text(
+                      "Guardar Cambios",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
             ),
           ),
         ),
@@ -403,7 +555,9 @@ class _AccountInfoViewState extends State<AccountInfoView> {
             onPressed: () {
               setState(() {
                 _isEditing = false;
-                _loadUserData(); // Recargar datos originales
+                // Recargar datos originales
+                _nameController.text = _profileController.profileName.value;
+                _emailController.text = _profileController.profileEmail.value;
               });
             },
             style: OutlinedButton.styleFrom(
@@ -425,15 +579,11 @@ class _AccountInfoViewState extends State<AccountInfoView> {
 
   void _saveChanges() {
     if (_formKey.currentState!.validate()) {
-      // Aquí implementarías la lógica para guardar los cambios
-      // Por ejemplo, actualizar el perfil en Firebase
-
-      Get.snackbar(
-        'Éxito',
-        'Perfil actualizado correctamente',
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
+      _profileController.saveProfile(
+        name: _nameController.text.trim(),
+        signo: _profileController.profileSigno.value,
+        genero: _profileController.profileGenero.value,
+        fechaNacimiento: _profileController.profileFechaNacimiento.value,
       );
 
       setState(() {

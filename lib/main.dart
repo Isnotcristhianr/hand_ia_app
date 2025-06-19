@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 //routes
 import 'routes/routes.dart';
@@ -65,6 +66,16 @@ class MyApp extends StatelessWidget {
       theme: _buildTheme(),
       darkTheme: _buildDarkTheme(),
       themeMode: ThemeMode.dark,
+      locale: const Locale('es', 'ES'),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('es', 'ES'), // Español
+        Locale('en', 'US'), // Inglés como respaldo
+      ],
       initialRoute: _getInitialRoute(),
       getPages: Routes.pages,
     );
