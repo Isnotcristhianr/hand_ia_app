@@ -698,7 +698,7 @@ class _LecturasViewState extends State<LecturasView> {
                     section.title,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 16,
+                      fontSize: 22,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -713,7 +713,7 @@ class _LecturasViewState extends State<LecturasView> {
               section.content,
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.9),
-                fontSize: 14,
+                fontSize: 18,
                 height: 1.5,
               ),
             ),
