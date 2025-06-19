@@ -12,6 +12,7 @@ import 'firebase_options.dart';
 
 //controllers
 import 'bloc/controllers/auth_controller.dart';
+import 'bloc/controllers/ocr_controller.dart';
 //services
 import 'services/firebase_service.dart';
 
@@ -46,9 +47,12 @@ void main() async {
   // Inicializar AuthController solo si Firebase está disponible
   if (firebaseService.isAvailable) {
     Get.put(AuthController());
-    debugPrint('✅ AuthController inicializado (Firebase disponible)');
+    Get.put(OcrController());
+    debugPrint(
+      '✅ AuthController y OcrController inicializados (Firebase disponible)',
+    );
   } else {
-    debugPrint('⚠️ AuthController no inicializado (Firebase no disponible)');
+    debugPrint('⚠️ Controladores no inicializados (Firebase no disponible)');
     debugPrint('📱 La app funcionará en modo offline');
   }
 

@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
@@ -8,10 +11,10 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-def keystoreProperties = new Properties()
-def keystorePropertiesFile = rootProject.file('key.properties')
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
 if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
 android {
@@ -29,11 +32,13 @@ android {
     }
 
     signingConfigs {
-        release {
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
-            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
-            storePassword keystoreProperties['storePassword']
+        if (keystoreProperties.containsKey("keyAlias")) {
+            create("release") {
+                keyAlias = keystoreProperties["keyAlias"] as String?
+                keyPassword = keystoreProperties["keyPassword"] as String?
+                storeFile = keystoreProperties["storeFile"]?.let { file(it as String) }
+                storePassword = keystoreProperties["storePassword"] as String?
+            }
         }
     }
 
@@ -49,10 +54,21 @@ android {
     }
 
     buildTypes {
+        debug {
+            isMinifyEnabled = false
+            isShrinkResources = false
+        }
         release {
-            signingConfig = signingConfigs.getByName("release")
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // Solo configurar signing si tenemos keystore properties
+            if (keystoreProperties.containsKey("keyAlias")) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+            isMinifyEnabled = false
+            isShrinkResources = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 }

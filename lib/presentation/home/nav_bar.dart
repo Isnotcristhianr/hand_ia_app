@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 //widgets
 import '../../widgets/glass/glass_container.dart';
+//controllers
+import '../../bloc/controllers/ocr_controller.dart';
 
 class NavBar extends StatefulWidget {
   final int currentIndex;
@@ -23,6 +26,9 @@ class NavBar extends StatefulWidget {
 class _NavBarState extends State<NavBar> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _breathingAnimation;
+
+  // Controlador OCR
+  final OcrController ocrController = Get.find<OcrController>();
 
   @override
   void initState() {
@@ -120,15 +126,28 @@ class _NavBarState extends State<NavBar> with SingleTickerProviderStateMixin {
                     ),
                     child: Material(
                       color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () {
-                          // Acción del botón flotante
-                        },
-                        customBorder: const CircleBorder(),
-                        child: const Icon(
-                          Icons.back_hand,
-                          color: Colors.white,
-                          size: 40,
+                      child: Obx(
+                        () => InkWell(
+                          onTap: ocrController.isLoading.value
+                              ? null
+                              : () async {
+                                  await ocrController.capturarFoto();
+                                },
+                          customBorder: const CircleBorder(),
+                          child: ocrController.isLoading.value
+                              ? const SizedBox(
+                                  width: 40,
+                                  height: 40,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 3,
+                                  ),
+                                )
+                              : const Icon(
+                                  Icons.back_hand,
+                                  color: Colors.white,
+                                  size: 40,
+                                ),
                         ),
                       ),
                     ),

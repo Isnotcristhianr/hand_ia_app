@@ -7,6 +7,7 @@ import '../presentation/views/login/login.dart';
 import '../presentation/views/login/sign_in.dart';
 import '../presentation/views/login/forgot.dart';
 import '../presentation/profile/account_info_view.dart';
+import '../presentation/lecturas/lecturas_view.dart';
 
 //routes
 class Routes {
@@ -22,5 +23,7 @@ class Routes {
     GetPage(name: '/forgot', page: () => const ForgotPasswordView()),
     //account info
     GetPage(name: '/account-info', page: () => const AccountInfoView()),
+    //lecturas
+    GetPage(name: '/lecturas', page: () => const LecturasView()),
   ];
 }
