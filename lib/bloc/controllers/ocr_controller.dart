@@ -30,7 +30,24 @@ class OcrController extends GetxController {
   void onInit() {
     super.onInit();
     _initializeGemini();
-    _loadLecturas();
+    _setupAuthListener();
+  }
+
+  // Configurar listener para cambios de autenticación
+  void _setupAuthListener() {
+    // Escuchar cambios en el UID del usuario
+    ever(authController.uid, (String uid) {
+      if (uid.isNotEmpty) {
+        loadLecturas(); // Método público
+      } else {
+        lecturas.clear(); // Limpiar si no hay usuario
+      }
+    });
+
+    // Cargar inicial si ya hay usuario autenticado
+    if (authController.uid.value.isNotEmpty) {
+      loadLecturas();
+    }
   }
 
   // Inicializar Gemini
@@ -53,35 +70,35 @@ class OcrController extends GetxController {
 
       // Crear el prompt para quiromancia
       const String promptQuiromancia = '''
-Eres un experto en quiromancia con años de experiencia analizando manos. 
-Analiza cuidadosamente esta imagen de una palma de la mano y proporciona una lectura detallada y profesional.
+        Eres un experto en quiromancia con años de experiencia analizando manos. 
+        Analiza cuidadosamente esta imagen de una palma de la mano y proporciona una lectura detallada y profesional.
 
-Tu análisis debe incluir:
+        Tu análisis debe incluir:
 
-🖐️ **Forma general de la mano:**
-- Tipo de mano (tierra, aire, fuego, agua) según la forma de la palma y longitud de dedos
-- Características generales de personalidad asociadas
+        🖐️ **Forma general de la mano:**
+        - Tipo de mano (tierra, aire, fuego, agua) según la forma de la palma y longitud de dedos
+        - Características generales de personalidad asociadas
 
-📏 **Principales líneas:**
-- **❤️ Línea del corazón:** Ubicación, forma, longitud y su interpretación emocional
-- **🧠 Línea de la cabeza:** Trayectoria y significado para la mentalidad
-- **💪 Línea de la vida:** Profundidad, longitud y vitalidad
-- Otras líneas importantes si son visibles
+        📏 **Principales líneas:**
+        - **❤️ Línea del corazón:** Ubicación, forma, longitud y su interpretación emocional
+        - **🧠 Línea de la cabeza:** Trayectoria y significado para la mentalidad
+        - **💪 Línea de la vida:** Profundidad, longitud y vitalidad
+        - Otras líneas importantes si son visibles
 
-🔍 **Detalles adicionales:**
-- Textura de la piel y callosidades
-- Forma y tamaño del pulgar
-- Montes de la palma (Venus, Luna, etc.)
-- Cualquier marca o característica especial
+        🔍 **Detalles adicionales:**
+        - Textura de la piel y callosidades
+        - Forma y tamaño del pulgar
+        - Montes de la palma (Venus, Luna, etc.)
+        - Cualquier marca o característica especial
 
-🧩 **Conclusión:**
-- Resumen de la personalidad basado en el análisis
-- Fortalezas y características principales
-- Aspectos emocionales y mentales destacados
+        🧩 **Conclusión:**
+        - Resumen de la personalidad basado en el análisis
+        - Fortalezas y características principales
+        - Aspectos emocionales y mentales destacados
 
-Proporciona una lectura empática, positiva y detallada, usando emojis para hacer el texto más atractivo. 
-Mantén un tono profesional pero accesible, como si fueras un quiromántico experimentado dando una consulta personal.
-''';
+        Proporciona una lectura empática, positiva y detallada, usando emojis para hacer el texto más atractivo. 
+        Mantén un tono profesional pero accesible, como si fueras un quiromántico experimentado dando una consulta personal.
+        ''';
 
       // Preparar el prompt de texto para quiromancia
       final prompt = TextPart(promptQuiromancia);
@@ -268,12 +285,19 @@ Esto puede deberse a:
     }
   }
 
-  // Cargar lecturas del usuario
-  Future<void> _loadLecturas() async {
+  // Cargar lecturas del usuario (método público)
+  Future<void> loadLecturas() async {
     try {
-      if (authController.uid.value.isEmpty) return;
+      if (authController.uid.value.isEmpty) {
+        debugPrint('⚠️ No hay usuario autenticado para cargar lecturas');
+        return;
+      }
+
+      isLoading(true);
+      error(''); // Limpiar errores previos
 
       final String userId = authController.uid.value;
+      debugPrint('📖 Cargando lecturas para usuario: $userId');
 
       final QuerySnapshot snapshot = await _firestore
           .collection('users')
@@ -291,10 +315,12 @@ Esto puede deberse a:
         lecturas.add(lectura);
       }
 
-      debugPrint('📖 Cargadas ${lecturas.length} lecturas');
+      debugPrint('✅ Cargadas ${lecturas.length} lecturas exitosamente');
     } catch (e) {
       debugPrint('❌ Error al cargar lecturas: $e');
       error('Error al cargar las lecturas: $e');
+    } finally {
+      isLoading(false);
     }
   }
 

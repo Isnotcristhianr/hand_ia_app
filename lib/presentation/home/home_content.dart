@@ -124,11 +124,15 @@ class HomeContent extends StatelessWidget {
                     return Obx(() {
                       final lecturas = ocrController.lecturas;
 
+                      if (ocrController.isLoading.value) {
+                        return _buildLoadingState();
+                      }
+
                       if (lecturas.isEmpty) {
                         return _buildEmptyState();
                       }
 
-                      // Mostrar solo las primeras 3 lecturas
+                      // Mostrar solo las primeras 5 lecturas
                       final lecturasLimitadas = lecturas.take(5).toList();
 
                       return ListView.separated(
@@ -227,7 +231,28 @@ class HomeContent extends StatelessWidget {
     );
   }
 
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const CircularProgressIndicator(color: Color(0xFF6366F1)),
+          const SizedBox(height: 16),
+          Text(
+            'Cargando lecturas...',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.7),
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildEmptyState() {
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
