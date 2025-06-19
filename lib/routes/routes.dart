@@ -25,5 +25,11 @@ class Routes {
     GetPage(name: '/account-info', page: () => const AccountInfoView()),
     //lecturas
     GetPage(name: '/lecturas', page: () => const LecturasView()),
+    GetPage(
+      name: '/lecturas/:index',
+      page: () => LecturasView(
+        initialIndex: int.tryParse(Get.parameters['index'] ?? '0') ?? 0,
+      ),
+    ),
   ];
 }

@@ -10,15 +10,25 @@ import '../../data/models/lectura_model.dart';
 import '../../widgets/glass/glass_container.dart';
 
 class LecturasView extends StatefulWidget {
-  const LecturasView({super.key});
+  final int initialIndex;
+
+  const LecturasView({super.key, this.initialIndex = 0});
 
   @override
   State<LecturasView> createState() => _LecturasViewState();
 }
 
 class _LecturasViewState extends State<LecturasView> {
-  final PageController _pageController = PageController();
+  late final PageController _pageController;
   final RxInt _currentIndex = 0.obs;
+
+  @override
+  void initState() {
+    super.initState();
+    // Configurar el índice inicial y el PageController
+    _currentIndex.value = widget.initialIndex;
+    _pageController = PageController(initialPage: widget.initialIndex);
+  }
 
   @override
   void dispose() {

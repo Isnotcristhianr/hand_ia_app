@@ -145,7 +145,11 @@ class HomeContent extends StatelessWidget {
                           final dateFormat = DateFormat('dd/MM/yyyy');
 
                           return GestureDetector(
-                            onTap: () => Get.toNamed('/lecturas'),
+                            onTap: () {
+                              // Encontrar el índice real de la lectura en la lista completa
+                              final realIndex = lecturas.indexOf(lectura);
+                              Get.toNamed('/lecturas/$realIndex');
+                            },
                             child: GlassContainer(
                               height: 70,
                               borderRadius: 30,
