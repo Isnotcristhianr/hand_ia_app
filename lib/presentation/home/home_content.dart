@@ -239,7 +239,7 @@ class HomeContent extends StatelessWidget {
           const CircularProgressIndicator(color: Color(0xFF6366F1)),
           const SizedBox(height: 16),
           Text(
-            'Cargando lecturas...',
+            'Analizando lectura...',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.7),
               fontSize: 16,
@@ -252,7 +252,6 @@ class HomeContent extends StatelessWidget {
   }
 
   Widget _buildEmptyState() {
-
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
