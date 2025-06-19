@@ -107,7 +107,7 @@ class LecturasView extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: GlassContainer(
-        height: 275,
+        height: 750,
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,9 +1,11 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_ai/firebase_ai.dart';
 
 // Modelos
 import '../../data/models/lectura_model.dart';
@@ -14,6 +16,7 @@ class OcrController extends GetxController {
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final ImagePicker _picker = ImagePicker();
+  late final GenerativeModel _model;
 
   // Estados reactivos
   final isLoading = false.obs;
@@ -26,7 +29,119 @@ class OcrController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _initializeGemini();
     _loadLecturas();
+  }
+
+  // Inicializar Gemini
+  void _initializeGemini() {
+    try {
+      _model = FirebaseAI.googleAI().generativeModel(model: 'gemini-2.0-flash');
+      debugPrint('✅ Gemini inicializado correctamente');
+    } catch (e) {
+      debugPrint('❌ Error al inicializar Gemini: $e');
+    }
+  }
+
+  // Analizar imagen con Gemini para quiromancia
+  Future<String> _analizarImagenConGemini(File imageFile) async {
+    try {
+      debugPrint('🔮 Iniciando análisis de quiromancia con Gemini...');
+
+      // Leer los bytes de la imagen
+      final Uint8List imageBytes = await imageFile.readAsBytes();
+
+      // Crear el prompt para quiromancia
+      const String promptQuiromancia = '''
+Eres un experto en quiromancia con años de experiencia analizando manos. 
+Analiza cuidadosamente esta imagen de una palma de la mano y proporciona una lectura detallada y profesional.
+
+Tu análisis debe incluir:
+
+🖐️ **Forma general de la mano:**
+- Tipo de mano (tierra, aire, fuego, agua) según la forma de la palma y longitud de dedos
+- Características generales de personalidad asociadas
+
+📏 **Principales líneas:**
+- **❤️ Línea del corazón:** Ubicación, forma, longitud y su interpretación emocional
+- **🧠 Línea de la cabeza:** Trayectoria y significado para la mentalidad
+- **💪 Línea de la vida:** Profundidad, longitud y vitalidad
+- Otras líneas importantes si son visibles
+
+🔍 **Detalles adicionales:**
+- Textura de la piel y callosidades
+- Forma y tamaño del pulgar
+- Montes de la palma (Venus, Luna, etc.)
+- Cualquier marca o característica especial
+
+🧩 **Conclusión:**
+- Resumen de la personalidad basado en el análisis
+- Fortalezas y características principales
+- Aspectos emocionales y mentales destacados
+
+Proporciona una lectura empática, positiva y detallada, usando emojis para hacer el texto más atractivo. 
+Mantén un tono profesional pero accesible, como si fueras un quiromántico experimentado dando una consulta personal.
+''';
+
+      // Preparar el prompt de texto para quiromancia
+      final prompt = TextPart(promptQuiromancia);
+
+      // Preparar la imagen para el análisis
+      final imagePart = InlineDataPart('image/jpeg', imageBytes);
+
+      // Crear el contenido multimodal con texto e imagen
+      final response = await _model.generateContent([
+        Content.multi([prompt, imagePart]),
+      ]);
+
+      final String analisis =
+          response.text ??
+          '''
+🔮 **Análisis de Quiromancia**
+
+Lo sentimos, no pudimos completar el análisis de tu palma en este momento. 
+
+Esto puede deberse a:
+- Problemas de conectividad
+- Calidad de la imagen
+- Servicio temporalmente no disponible
+
+**Consejos para una mejor lectura:**
+- Asegúrate de tener buena iluminación
+- Mantén la palma extendida y visible
+- Evita sombras sobre la mano
+- Intenta nuevamente en unos minutos
+
+¡Vuelve a intentarlo para obtener tu lectura personalizada! 🖐️✨
+''';
+
+      debugPrint('✅ Análisis de quiromancia completado');
+      debugPrint('📝 Longitud del análisis: ${analisis.length} caracteres');
+
+      return analisis;
+    } catch (e) {
+      debugPrint('❌ Error al analizar imagen con Gemini: $e');
+
+      // Retornar un mensaje de error amigable
+      return '''
+🔮 **Análisis de Quiromancia**
+
+Lo sentimos, no pudimos completar el análisis de tu palma en este momento. 
+
+Esto puede deberse a:
+- Problemas de conectividad
+- Calidad de la imagen
+- Servicio temporalmente no disponible
+
+**Consejos para una mejor lectura:**
+- Asegúrate de tener buena iluminación
+- Mantén la palma extendida y visible
+- Evita sombras sobre la mano
+- Intenta nuevamente en unos minutos
+
+¡Vuelve a intentarlo para obtener tu lectura personalizada! 🖐️✨
+''';
+    }
   }
 
   // Abrir cámara y capturar foto
@@ -61,7 +176,7 @@ class OcrController extends GetxController {
 
       debugPrint('📸 Foto capturada: ${photo.path}');
 
-      // Subir imagen y crear lectura
+      // Subir imagen y crear lectura con análisis de IA
       await _subirImagenYCrearLectura(File(photo.path));
     } catch (e) {
       debugPrint('❌ Error al capturar foto: $e');
@@ -98,11 +213,16 @@ class OcrController extends GetxController {
 
       debugPrint('✅ Imagen subida. URL: $imageUrl');
 
-      // Crear lectura
+      // Analizar imagen con Gemini
+      final String analisisQuiromancia = await _analizarImagenConGemini(
+        imageFile,
+      );
+
+      // Crear lectura con el análisis
       final LecturaModel nuevaLectura = LecturaModel.empty(
         userId: userId,
         imageUrl: imageUrl,
-      );
+      ).copyWith(response: [analisisQuiromancia]);
 
       // Guardar en Firestore
       await _guardarLectura(nuevaLectura);

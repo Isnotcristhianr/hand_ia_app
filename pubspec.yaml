@@ -42,6 +42,8 @@ dependencies:
   #localizaciones en español
   flutter_localizations:
     sdk: flutter
+  #firebase ai
+  firebase_ai: ^2.1.0
 
 dev_dependencies:
   flutter_test:
