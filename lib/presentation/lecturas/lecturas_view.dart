@@ -206,6 +206,7 @@ class _LecturasViewState extends State<LecturasView> {
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Header con fecha
           GlassContainer(
@@ -262,10 +263,10 @@ class _LecturasViewState extends State<LecturasView> {
 
           // Imagen de la mano
           GlassContainer(
-            height: 370,
             padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
                   children: [
@@ -288,35 +289,40 @@ class _LecturasViewState extends State<LecturasView> {
                 const SizedBox(height: 16),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: AspectRatio(
-                    aspectRatio: 16 / 12,
-                    child: Image.network(
-                      lectura.imageUrl,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Container(
-                          color: Colors.grey.withValues(alpha: 0.3),
-                          child: const Center(
-                            child: CircularProgressIndicator(
-                              color: Color(0xFF6366F1),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(context).size.height * 0.3,
+                    ),
+                    child: AspectRatio(
+                      aspectRatio: 4 / 3,
+                      child: Image.network(
+                        lectura.imageUrl,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Container(
+                            color: Colors.grey.withValues(alpha: 0.3),
+                            child: const Center(
+                              child: CircularProgressIndicator(
+                                color: Color(0xFF6366F1),
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey.withValues(alpha: 0.3),
-                          child: const Center(
-                            child: Icon(
-                              Icons.error_outline,
-                              color: Colors.red,
-                              size: 48,
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey.withValues(alpha: 0.3),
+                            child: const Center(
+                              child: Icon(
+                                Icons.error_outline,
+                                color: Colors.red,
+                                size: 48,
+                              ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
@@ -395,6 +401,7 @@ class _LecturasViewState extends State<LecturasView> {
     final sections = _parseAnalysisText(analysisText);
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         // Título del análisis
         GlassContainer(
@@ -430,7 +437,7 @@ class _LecturasViewState extends State<LecturasView> {
   List<AnalysisSection> _parseAnalysisText(String text) {
     final sections = <AnalysisSection>[];
 
-    // Dividir el texto en secciones basándose en los patrones
+    // Limpiar el texto y dividirlo en líneas
     final lines = text.split('\n');
     String currentTitle = '';
     List<String> currentContent = [];
@@ -439,14 +446,14 @@ class _LecturasViewState extends State<LecturasView> {
       line = line.trim();
       if (line.isEmpty) continue;
 
-      // Detectar títulos (líneas que contienen ** o emojis específicos)
-      if (line.contains('**') || _isTitle(line)) {
-        // Guardar sección anterior
+      // Detectar títulos más específicamente
+      if (_isTitle(line)) {
+        // Guardar sección anterior si existe
         if (currentTitle.isNotEmpty && currentContent.isNotEmpty) {
           sections.add(
             AnalysisSection(
               title: currentTitle,
-              content: currentContent.join('\n'),
+              content: _formatContent(currentContent.join('\n')),
               icon: _getIconForSection(currentTitle),
             ),
           );
@@ -456,6 +463,7 @@ class _LecturasViewState extends State<LecturasView> {
         currentTitle = _cleanTitle(line);
         currentContent = [];
       } else {
+        // Agregar contenido a la sección actual
         currentContent.add(line);
       }
     }
@@ -465,32 +473,31 @@ class _LecturasViewState extends State<LecturasView> {
       sections.add(
         AnalysisSection(
           title: currentTitle,
-          content: currentContent.join('\n'),
+          content: _formatContent(currentContent.join('\n')),
           icon: _getIconForSection(currentTitle),
         ),
       );
     }
 
-    // Si no se encontraron secciones, crear una sección general
+    // Si no se encontraron secciones, dividir el texto en párrafos lógicos
     if (sections.isEmpty) {
-      sections.add(
-        AnalysisSection(
-          title: 'Análisis de tu Mano',
-          content: text,
-          icon: Icons.back_hand,
-        ),
-      );
+      sections.addAll(_createDefaultSections(text));
     }
 
     return sections;
   }
 
   bool _isTitle(String line) {
-    return line.contains('🖐️') ||
-        line.contains('📏') ||
-        line.contains('🔍') ||
-        line.contains('🧩') ||
-        line.contains('**');
+    // Detectar líneas que son títulos
+    return line.contains('**') &&
+        (line.contains('🖐️') ||
+            line.contains('📏') ||
+            line.contains('🔍') ||
+            line.contains('🧩') ||
+            line.contains('Forma general') ||
+            line.contains('Principales líneas') ||
+            line.contains('Detalles adicionales') ||
+            line.contains('Conclusión'));
   }
 
   String _cleanTitle(String title) {
@@ -501,24 +508,174 @@ class _LecturasViewState extends State<LecturasView> {
         .replaceAll('📏', '')
         .replaceAll('🔍', '')
         .replaceAll('🧩', '')
+        .replaceAll(':', '')
         .trim();
   }
 
+  String _formatContent(String content) {
+    // Mejorar el formato del contenido
+    return content
+        .replaceAll('* **', '• ')
+        .replaceAll('**', '')
+        .replaceAll('*', '')
+        .trim();
+  }
+
+  List<AnalysisSection> _createDefaultSections(String text) {
+    final sections = <AnalysisSection>[];
+
+    // Buscar patrones específicos en el texto
+    if (text.contains('Forma general')) {
+      final formaMatch = _extractSection(
+        text,
+        'Forma general',
+        'Principales líneas',
+      );
+      if (formaMatch.isNotEmpty) {
+        sections.add(
+          AnalysisSection(
+            title: 'Forma General de la Mano',
+            content: formaMatch,
+            icon: Icons.back_hand,
+          ),
+        );
+      }
+    }
+
+    if (text.contains('Principales líneas')) {
+      final lineasMatch = _extractSection(
+        text,
+        'Principales líneas',
+        'Detalles adicionales',
+      );
+      if (lineasMatch.isNotEmpty) {
+        sections.add(
+          AnalysisSection(
+            title: 'Principales Líneas',
+            content: lineasMatch,
+            icon: Icons.linear_scale,
+          ),
+        );
+      }
+    }
+
+    if (text.contains('Detalles adicionales')) {
+      final detallesMatch = _extractSection(
+        text,
+        'Detalles adicionales',
+        'Conclusión',
+      );
+      if (detallesMatch.isNotEmpty) {
+        sections.add(
+          AnalysisSection(
+            title: 'Detalles Adicionales',
+            content: detallesMatch,
+            icon: Icons.zoom_in,
+          ),
+        );
+      }
+    }
+
+    if (text.contains('Conclusión')) {
+      final conclusionMatch = _extractSection(text, 'Conclusión', '');
+      if (conclusionMatch.isNotEmpty) {
+        sections.add(
+          AnalysisSection(
+            title: 'Conclusión',
+            content: conclusionMatch,
+            icon: Icons.psychology,
+          ),
+        );
+      }
+    }
+
+    // Si aún no hay secciones, crear una sección general
+    if (sections.isEmpty) {
+      // Dividir el texto en párrafos y crear secciones
+      final paragraphs = text.split('\n\n');
+      if (paragraphs.length > 1) {
+        for (int i = 0; i < paragraphs.length; i++) {
+          if (paragraphs[i].trim().isNotEmpty) {
+            sections.add(
+              AnalysisSection(
+                title: 'Análisis ${i + 1}',
+                content: _formatContent(paragraphs[i]),
+                icon: _getIconForIndex(i),
+              ),
+            );
+          }
+        }
+      } else {
+        sections.add(
+          AnalysisSection(
+            title: 'Análisis de tu Mano',
+            content: _formatContent(text),
+            icon: Icons.back_hand,
+          ),
+        );
+      }
+    }
+
+    return sections;
+  }
+
+  String _extractSection(String text, String startMarker, String endMarker) {
+    final startIndex = text.indexOf(startMarker);
+    if (startIndex == -1) return '';
+
+    int endIndex;
+    if (endMarker.isEmpty) {
+      endIndex = text.length;
+    } else {
+      endIndex = text.indexOf(endMarker, startIndex);
+      if (endIndex == -1) endIndex = text.length;
+    }
+
+    return _formatContent(text.substring(startIndex, endIndex));
+  }
+
   IconData _getIconForSection(String title) {
-    if (title.toLowerCase().contains('forma') ||
-        title.toLowerCase().contains('general')) {
+    final lowerTitle = title.toLowerCase();
+    if (lowerTitle.contains('forma') ||
+        lowerTitle.contains('general') ||
+        lowerTitle.contains('tipo')) {
       return Icons.back_hand;
-    } else if (title.toLowerCase().contains('línea') ||
-        title.toLowerCase().contains('principales')) {
+    } else if (lowerTitle.contains('línea') ||
+        lowerTitle.contains('principales') ||
+        lowerTitle.contains('corazón') ||
+        lowerTitle.contains('cabeza') ||
+        lowerTitle.contains('vida')) {
       return Icons.linear_scale;
-    } else if (title.toLowerCase().contains('detalle') ||
-        title.toLowerCase().contains('adicional')) {
+    } else if (lowerTitle.contains('detalle') ||
+        lowerTitle.contains('adicional') ||
+        lowerTitle.contains('textura') ||
+        lowerTitle.contains('pulgar')) {
       return Icons.zoom_in;
-    } else if (title.toLowerCase().contains('conclusión') ||
-        title.toLowerCase().contains('resumen')) {
+    } else if (lowerTitle.contains('conclusión') ||
+        lowerTitle.contains('resumen') ||
+        lowerTitle.contains('personalidad')) {
       return Icons.psychology;
+    } else if (lowerTitle.contains('emocional') ||
+        lowerTitle.contains('mental') ||
+        lowerTitle.contains('aspectos')) {
+      return Icons.favorite;
     } else {
       return Icons.star;
+    }
+  }
+
+  IconData _getIconForIndex(int index) {
+    switch (index % 4) {
+      case 0:
+        return Icons.back_hand;
+      case 1:
+        return Icons.linear_scale;
+      case 2:
+        return Icons.zoom_in;
+      case 3:
+        return Icons.psychology;
+      default:
+        return Icons.star;
     }
   }
 
@@ -526,10 +683,10 @@ class _LecturasViewState extends State<LecturasView> {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: GlassContainer(
-        height: 500,
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             // Título de la sección
             Row(
