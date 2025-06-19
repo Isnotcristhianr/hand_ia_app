@@ -35,6 +35,13 @@ dependencies:
   google_sign_in: ^6.3.0
   #apple sign in
   sign_in_with_apple: ^7.0.1
+  #image picker
+  image_picker: ^1.1.2
+  #formato de fechas
+  intl: ^0.20.2
+  #localizaciones en español
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
