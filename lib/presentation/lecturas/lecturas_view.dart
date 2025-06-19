@@ -107,6 +107,7 @@ class LecturasView extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: GlassContainer(
+        height: 275,
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,102 +124,187 @@ class LecturasView extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                IconButton(
-                  onPressed: () => _showDeleteDialog(lectura, controller),
-                  icon: const Icon(
-                    Icons.delete_outline,
-                    color: Colors.red,
-                    size: 20,
+                Obx(
+                  () => IconButton(
+                    onPressed: controller.isLoading.value
+                        ? null
+                        : () => _showDeleteDialog(lectura, controller),
+                    icon: controller.isLoading.value
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.red,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Icon(
+                            Icons.delete_outline,
+                            color: Colors.red,
+                            size: 20,
+                          ),
                   ),
                 ),
               ],
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
 
-            // Imagen capturada
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                lectura.imageUrl,
-                width: double.infinity,
-                height: 200,
-                fit: BoxFit.cover,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return Container(
-                    width: double.infinity,
-                    height: 200,
-                    color: Colors.grey.withValues(alpha: 0.3),
-                    child: const Center(
-                      child: CircularProgressIndicator(
-                        color: Color(0xFF6366F1),
+            // Layout de dos columnas: Imagen a la izquierda, análisis a la derecha
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Columna izquierda - Imagen
+                Expanded(
+                  flex: 2,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: AspectRatio(
+                      aspectRatio: 1.0, // Hace la imagen cuadrada
+                      child: Image.network(
+                        lectura.imageUrl,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Container(
+                            color: Colors.grey.withValues(alpha: 0.3),
+                            child: const Center(
+                              child: CircularProgressIndicator(
+                                color: Color(0xFF6366F1),
+                              ),
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey.withValues(alpha: 0.3),
+                            child: const Center(
+                              child: Icon(
+                                Icons.error_outline,
+                                color: Colors.red,
+                                size: 48,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
-                  );
-                },
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    width: double.infinity,
-                    height: 200,
-                    color: Colors.grey.withValues(alpha: 0.3),
-                    child: const Icon(
-                      Icons.error_outline,
-                      color: Colors.red,
-                      size: 48,
-                    ),
-                  );
-                },
-              ),
+                  ),
+                ),
+
+                const SizedBox(width: 16),
+
+                // Columna derecha - Análisis
+                Expanded(
+                  flex: 3,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Estado de la lectura
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: lectura.response.isEmpty
+                              ? Colors.orange.withValues(alpha: 0.2)
+                              : Colors.green.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: lectura.response.isEmpty
+                                ? Colors.orange.withValues(alpha: 0.5)
+                                : Colors.green.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        child: Text(
+                          lectura.response.isEmpty
+                              ? 'Pendiente de análisis'
+                              : 'Análisis completado',
+                          style: TextStyle(
+                            color: lectura.response.isEmpty
+                                ? Colors.orange
+                                : Colors.green,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Título del análisis
+                      const Text(
+                        'Análisis de la Mano',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      // Contenido del análisis
+                      if (lectura.response.isEmpty)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Tu foto está siendo procesada por nuestra IA especializada en quiromancia.',
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.8),
+                                fontSize: 14,
+                                height: 1.4,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.hourglass_empty,
+                                  color: Colors.orange.withValues(alpha: 0.8),
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Tiempo estimado: 2-5 minutos',
+                                  style: TextStyle(
+                                    color: Colors.orange.withValues(alpha: 0.8),
+                                    fontSize: 12,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        )
+                      else
+                        // Aquí se mostraría el análisis completado
+                        Column(
+                          children: lectura.response
+                              .map(
+                                (respuesta) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: Text(
+                                    respuesta,
+                                    style: TextStyle(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.9,
+                                      ),
+                                      fontSize: 14,
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-
-            const SizedBox(height: 12),
-
-            // Estado de la lectura
-            if (lectura.response.isEmpty)
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: Colors.orange.withValues(alpha: 0.5),
-                  ),
-                ),
-                child: const Text(
-                  'Pendiente de análisis',
-                  style: TextStyle(
-                    color: Colors.orange,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              )
-            else
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: Colors.green.withValues(alpha: 0.5),
-                  ),
-                ),
-                child: const Text(
-                  'Análisis completado',
-                  style: TextStyle(
-                    color: Colors.green,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
           ],
         ),
       ),

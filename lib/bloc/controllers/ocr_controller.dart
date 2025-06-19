@@ -190,6 +190,25 @@ class OcrController extends GetxController {
 
       final String userId = authController.uid.value;
 
+      // Buscar la lectura para obtener la URL de la imagen
+      final lectura = lecturas.firstWhereOrNull((l) => l.id == lecturaId);
+      if (lectura == null) {
+        error('Lectura no encontrada');
+        return;
+      }
+
+      isLoading(true);
+
+      // Eliminar imagen del Storage
+      try {
+        final Reference imageRef = _storage.refFromURL(lectura.imageUrl);
+        await imageRef.delete();
+        debugPrint('✅ Imagen eliminada del Storage');
+      } catch (e) {
+        debugPrint('⚠️ Error al eliminar imagen del Storage: $e');
+        // Continuar aunque falle eliminar la imagen
+      }
+
       // Eliminar de Firestore
       await _firestore
           .collection('users')
@@ -201,15 +220,27 @@ class OcrController extends GetxController {
       // Eliminar de la lista local
       lecturas.removeWhere((lectura) => lectura.id == lecturaId);
 
+      debugPrint('✅ Lectura eliminada completamente');
+
       Get.snackbar(
         'Éxito',
         'Lectura eliminada correctamente',
         backgroundColor: Colors.green.withValues(alpha: 0.8),
         colorText: Colors.white,
+        duration: const Duration(seconds: 2),
       );
     } catch (e) {
       debugPrint('❌ Error al eliminar lectura: $e');
       error('Error al eliminar la lectura: $e');
+      Get.snackbar(
+        'Error',
+        'No se pudo eliminar la lectura',
+        backgroundColor: Colors.red.withValues(alpha: 0.8),
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+      );
+    } finally {
+      isLoading(false);
     }
   }
 

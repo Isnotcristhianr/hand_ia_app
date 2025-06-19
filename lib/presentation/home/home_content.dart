@@ -119,7 +119,7 @@ class HomeContent extends StatelessWidget {
               // Lista de lecturas
               Expanded(
                 child: GetBuilder<OcrController>(
-                  init: Get.find<OcrController>(),
+                  init: Get.put(OcrController()),
                   builder: (ocrController) {
                     return Obx(() {
                       final lecturas = ocrController.lecturas;
@@ -129,7 +129,7 @@ class HomeContent extends StatelessWidget {
                       }
 
                       // Mostrar solo las primeras 3 lecturas
-                      final lecturasLimitadas = lecturas.take(3).toList();
+                      final lecturasLimitadas = lecturas.take(5).toList();
 
                       return ListView.separated(
                         padding: const EdgeInsets.symmetric(horizontal: 32.0),
@@ -143,7 +143,7 @@ class HomeContent extends StatelessWidget {
                           return GestureDetector(
                             onTap: () => Get.toNamed('/lecturas'),
                             child: GlassContainer(
-                              height: 60,
+                              height: 70,
                               borderRadius: 30,
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 20,
