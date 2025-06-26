@@ -643,6 +643,8 @@ class AuthController extends GetxController {
   //* Login con Apple
   Future<void> loginWithApple() async {
     try {
+      isLoading.value = true;
+      authStatus.value = AuthStatus.checking;
       debugPrint('Iniciando login con Apple...');
 
       // Verificar si el servicio está disponible
@@ -653,6 +655,8 @@ class AuthController extends GetxController {
         );
       }
 
+      debugPrint('Apple Sign In está disponible en este dispositivo');
+
       final credential = await SignInWithApple.getAppleIDCredential(
         scopes: [
           AppleIDAuthorizationScopes.email,
@@ -661,6 +665,15 @@ class AuthController extends GetxController {
       );
 
       debugPrint('Credencial de Apple obtenida');
+      debugPrint(
+        'Identity Token: ${credential.identityToken != null ? "✓" : "✗"}',
+      );
+      debugPrint(
+        'Authorization Code: ${credential.authorizationCode != null ? "✓" : "✗"}',
+      );
+      debugPrint('Email: ${credential.email ?? "No disponible"}');
+      debugPrint('Given Name: ${credential.givenName ?? "No disponible"}');
+      debugPrint('Family Name: ${credential.familyName ?? "No disponible"}');
 
       // Crear credencial de Firebase
       final oAuthProvider = OAuthProvider('apple.com');
@@ -726,13 +739,37 @@ class AuthController extends GetxController {
       );
     } catch (e) {
       debugPrint('Error inesperado en login con Apple: $e');
+      debugPrint('Tipo de error: ${e.runtimeType}');
+      debugPrint('Detalles del error: ${e.toString()}');
+
+      String errorMessage =
+          'No se pudo completar el inicio de sesión con Apple';
+
+      // Detalles específicos según el tipo de error
+      if (e.toString().contains('canceled') ||
+          e.toString().contains('Canceled')) {
+        errorMessage = 'Inicio de sesión con Apple cancelado';
+      } else if (e.toString().contains('network') ||
+          e.toString().contains('Network')) {
+        errorMessage = 'Error de conexión. Verifica tu conexión a internet';
+      } else if (e.toString().contains('configuration') ||
+          e.toString().contains('Configuration')) {
+        errorMessage = 'Error de configuración. Contacta al soporte técnico';
+      }
+
       Get.snackbar(
         'Error',
-        'No se pudo completar el inicio de sesión con Apple',
+        errorMessage,
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
+        duration: Duration(seconds: 5),
       );
+    } finally {
+      isLoading.value = false;
+      if (authStatus.value == AuthStatus.checking) {
+        authStatus.value = AuthStatus.unauthenticated;
+      }
     }
   }
 
