@@ -439,7 +439,7 @@ class _LecturasViewState extends State<LecturasView> {
         const SizedBox(height: 16),
 
         // Contenido del análisis por secciones
-        ...sections.map((section) => _buildAnalysisSection(section)).toList(),
+        ...sections.map((section) => _buildAnalysisSection(section)),
       ],
     );
   }

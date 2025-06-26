@@ -669,6 +669,7 @@ class AuthController extends GetxController {
         'Identity Token: ${credential.identityToken != null ? "✓" : "✗"}',
       );
       debugPrint(
+        // ignore: unnecessary_null_comparison
         'Authorization Code: ${credential.authorizationCode != null ? "✓" : "✗"}',
       );
       debugPrint('Email: ${credential.email ?? "No disponible"}');
