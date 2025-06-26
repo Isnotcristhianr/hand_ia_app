@@ -465,7 +465,17 @@ class AuthController extends GetxController {
   Future<void> loginWithGoogle() async {
     try {
       isLoading.value = true;
+      authStatus.value = AuthStatus.checking;
       debugPrint('Iniciando login con Google...');
+
+      // Verificar que Firebase esté disponible
+      try {
+        Firebase.app();
+        debugPrint('Firebase disponible para Google Sign In');
+      } catch (e) {
+        debugPrint('Firebase no disponible: $e');
+        throw Exception('Firebase no está configurado correctamente');
+      }
 
       // Configurar GoogleSignIn con manejo de errores mejorado
       final GoogleSignIn googleSignIn = GoogleSignIn(
@@ -486,7 +496,8 @@ class AuthController extends GetxController {
 
       if (googleUser == null) {
         debugPrint('Usuario canceló el inicio de sesión con Google');
-        throw Exception('Inicio de sesión cancelado');
+        authStatus.value = AuthStatus.unauthenticated;
+        return; // No mostrar error si el usuario cancela
       }
 
       debugPrint('Cuenta de Google seleccionada: ${googleUser.email}');
@@ -533,20 +544,63 @@ class AuthController extends GetxController {
 
       // Actualizar datos observables
       uid.value = user.uid;
-      email.value = user.email ?? '';
-      name.value = user.displayName ?? '';
-      profilePicture.value = user.photoURL ?? '';
+      userName.value = user.displayName ?? 'Usuario';
+      userEmail.value = user.email ?? '';
+      profileImage.value = user.photoURL;
 
       // Actualizar datos del usuario en Firestore si es necesario
       await _firestore.collection('users').doc(user.uid).update({
         'lastLogin': Timestamp.now(),
-        'name': user.displayName ?? name.value,
-        'email': user.email?.toLowerCase() ?? email.value,
-        'photoUrl': user.photoURL ?? profilePicture.value,
+        'name': user.displayName ?? userName.value,
+        'email': user.email?.toLowerCase() ?? userEmail.value,
+        'photoUrl': user.photoURL ?? '',
       });
 
       debugPrint('Login con Google exitoso');
       authStatus.value = AuthStatus.authenticated;
+
+      // Navegación automática se maneja en authStateChanges
+    } on FirebaseAuthException catch (e) {
+      debugPrint(
+        'FirebaseAuthException en login con Google: ${e.code} - ${e.message}',
+      );
+      String errorMessage = 'Error de autenticación con Google';
+
+      switch (e.code) {
+        case 'account-exists-with-different-credential':
+          errorMessage =
+              'Ya existe una cuenta con un método de autenticación diferente';
+          break;
+        case 'invalid-credential':
+          errorMessage = 'Credenciales inválidas de Google';
+          break;
+        case 'operation-not-allowed':
+          errorMessage = 'El inicio de sesión con Google no está habilitado';
+          break;
+        case 'user-disabled':
+          errorMessage = 'Esta cuenta ha sido deshabilitada';
+          break;
+        case 'user-not-found':
+          errorMessage = 'No se encontró la cuenta de usuario';
+          break;
+        case 'wrong-password':
+          errorMessage = 'Credenciales incorrectas';
+          break;
+        case 'network-request-failed':
+          errorMessage = 'Error de conexión. Verifica tu conexión a internet';
+          break;
+        default:
+          errorMessage = 'Error de Firebase: ${e.message}';
+      }
+
+      Get.snackbar(
+        'Error de Autenticación',
+        errorMessage,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 5),
+      );
     } catch (e) {
       debugPrint('Error detallado en login con Google: $e');
       String errorMessage =
@@ -560,11 +614,14 @@ class AuthController extends GetxController {
         errorMessage = 'Inicio de sesión cancelado.';
       } else if (e.toString().contains('credential')) {
         errorMessage =
-            'Error de autenticación. Verifica tu configuración de Firebase.';
+            'Error de autenticación. Verifica la configuración de Firebase.';
       } else if (e.toString().contains('channel-error') ||
           e.toString().contains('PlatformException')) {
         errorMessage =
-            'Error de configuración. Intenta de nuevo en unos momentos.';
+            'Error de configuración. Asegúrate de que GoogleService-Info.plist esté configurado correctamente.';
+      } else if (e.toString().contains('GoogleService-Info.plist')) {
+        errorMessage =
+            'Falta el archivo GoogleService-Info.plist en el proyecto iOS.';
       }
 
       Get.snackbar(
@@ -577,6 +634,9 @@ class AuthController extends GetxController {
       );
     } finally {
       isLoading.value = false;
+      if (authStatus.value == AuthStatus.checking) {
+        authStatus.value = AuthStatus.unauthenticated;
+      }
     }
   }
 

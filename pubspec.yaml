@@ -91,6 +91,8 @@ flutter:
     - lib/assets/icon/logo.png
     - lib/assets/icon/logo_dark.png
     - lib/assets/icon/logo_bg.png
+    - lib/assets/loggin/apple.png
+    - lib/assets/loggin/googleIcon.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

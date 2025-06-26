@@ -235,10 +235,10 @@ class _LoginViewState extends State<LoginView> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(
-                                    Icons.g_mobiledata_outlined,
-                                    color: Colors.white.withValues(alpha: 0.9),
-                                    size: 28,
+                                  Image.asset(
+                                    'lib/assets/loggin/googleIcon.png',
+                                    width: 28,
+                                    height: 28,
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
@@ -269,10 +269,10 @@ class _LoginViewState extends State<LoginView> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(
-                                    Icons.apple,
-                                    color: Colors.white.withValues(alpha: 0.9),
-                                    size: 24,
+                                  Image.asset(
+                                    'lib/assets/loggin/apple.png',
+                                    width: 24,
+                                    height: 24,
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
