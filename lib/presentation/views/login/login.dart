@@ -256,40 +256,43 @@ class _LoginViewState extends State<LoginView> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: GlassContainer(
-                            height: 48,
-                            borderRadius: 35,
-                            child: InkWell(
-                              onTap: () {
-                                _authController.loginWithApple();
-                              },
-                              borderRadius: BorderRadius.circular(16),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset(
-                                    'lib/assets/loggin/apple.png',
-                                    width: 24,
-                                    height: 24,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Apple',
-                                    style: TextStyle(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.9,
-                                      ),
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
+                        if (Theme.of(context).platform ==
+                            TargetPlatform.iOS) ...[
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: GlassContainer(
+                              height: 48,
+                              borderRadius: 35,
+                              child: InkWell(
+                                onTap: () {
+                                  _authController.loginWithApple();
+                                },
+                                borderRadius: BorderRadius.circular(16),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      'lib/assets/loggin/apple.png',
+                                      width: 24,
+                                      height: 24,
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Apple',
+                                      style: TextStyle(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.9,
+                                        ),
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
+                        ],
                       ],
                     ),
 

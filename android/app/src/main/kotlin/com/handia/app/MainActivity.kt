@@ -1,4 +1,4 @@
-package com.example.hand_ia
+package com.handia.app
 
 import io.flutter.embedding.android.FlutterActivity
 
